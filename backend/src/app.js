@@ -7,7 +7,15 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 const app = express();
 
 // 1. Middlewares globales
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      'http://localhost:5173',
+      'https://cota-frontend.vercel.app',
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

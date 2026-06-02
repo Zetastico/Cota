@@ -9,9 +9,16 @@ import CustomError from '../utils/customError.js';
  * @returns {Promise<Object>} Datos del usuario registrado sin password
  */
 const register = async (userData) => {
-  return await userService.createUser(userData);
-};
+  const sanitizedUserData = {
+    ...userData,
+    rol:
+      userData.rol === 'HOST'
+        ? 'HOST'
+        : 'USER',
+  };
 
+  return await userService.createUser(sanitizedUserData);
+};
 /**
  * Valida credenciales de usuario y genera un token de autenticación
  * @param {string} email - Correo del usuario

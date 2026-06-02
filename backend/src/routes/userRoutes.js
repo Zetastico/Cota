@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, authorize } from '../middleware/authMiddleware.js';
 import {
   getAllUsers,
   getUserById,
@@ -18,14 +19,16 @@ const router = express.Router();
 // Aplicar el middleware de protección JWT a todas las rutas de este router
 router.use(protect);
 
-// Rutas para el CRUD de usuarios
 router.route('/')
-  .get(getAllUsers)
-  .post(createUserValidation, createUser);
+  .get(authorize('ADMIN'), getAllUsers)
+  .post(authorize('ADMIN'), createUserValidation, createUser);
 
 router.route('/:id')
-  .get(idParamValidation, getUserById)
-  .put(idParamValidation, updateUserValidation, updateUser)
-  .delete(idParamValidation, deleteUser);
+  .get(authorize('ADMIN'), idParamValidation, getUserById)
+  .put(authorize('ADMIN'), idParamValidation, updateUserValidation, updateUser)
+  .delete(authorize('ADMIN'), idParamValidation, deleteUser);
+
+// Rutas para el CRUD de usuarios
+
 
 export default router;

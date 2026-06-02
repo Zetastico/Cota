@@ -18,7 +18,7 @@ const DashboardLayout = () => {
     navigate('/login');
   };
 
-  // Enlaces de navegación con iconos SVG inline
+  // Enlaces de navegación con iconos SVG inline adaptados según rol
   const navigation = [
     {
       name: 'Dashboard',
@@ -29,7 +29,10 @@ const DashboardLayout = () => {
         </svg>
       ),
     },
-    {
+  ];
+
+  if (user?.rol === 'ADMIN') {
+    navigation.push({
       name: 'Usuarios',
       href: '/users',
       icon: (
@@ -37,8 +40,27 @@ const DashboardLayout = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       ),
-    },
-  ];
+    });
+    navigation.push({
+      name: 'Servicios Pendientes',
+      href: '/services/pending',
+      icon: (
+        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      ),
+    });
+  } else if (user?.rol === 'HOST') {
+    navigation.push({
+      name: 'Mis Servicios',
+      href: '/services',
+      icon: (
+        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+    });
+  }
 
   // Helper para detectar ruta activa
   const isActive = (path) => location.pathname === path;

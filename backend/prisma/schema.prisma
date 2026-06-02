@@ -17,6 +17,12 @@ enum Role {
   ADMIN
 }
 
+enum ServiceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // Modelo de Usuario
 model User {
   id        String   @id @default(uuid())
@@ -25,8 +31,29 @@ model User {
   email     String   @unique
   password  String
   rol       Role     @default(USER)
+
+  services  Service[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model Service {
+  id          String        @id @default(uuid())
+
+  title       String
+  description String
+
+  price       Float
+  category    String
+
+  status      ServiceStatus @default(PENDING)
+
+  ownerId     String
+  owner       User          @relation(fields: [ownerId], references: [id])
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }

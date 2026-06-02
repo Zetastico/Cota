@@ -10,6 +10,10 @@ import DashboardPage from "./pages/DashboardPage"
 import UsersPage from "./pages/UsersPage"
 import CreateUserPage from "./pages/CreateUserPage"
 import EditUserPage from "./pages/EditUserPage"
+import ServicesPage from "./pages/ServicesPage"
+import CreateServicePage from "./pages/CreateServicePage"
+import EditServicePage from "./pages/EditServicePage"
+import PendingServicesPage from "./pages/PendingServicesPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
 function App() {
@@ -33,10 +37,68 @@ function App() {
 
           <Route path="dashboard" element={<DashboardPage />} />
 
+          {/* User management (Admin only) */}
           <Route path="users">
-            <Route index element={<UsersPage />} />
-            <Route path="create" element={<CreateUserPage />} />
-            <Route path=":id/edit" element={<EditUserPage />} />
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <UsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="create"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <CreateUserPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path=":id/edit"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <EditUserPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+
+          {/* Service management */}
+          <Route path="services">
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={["HOST", "ADMIN"]}>
+                  <ServicesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="create"
+              element={
+                <ProtectedRoute allowedRoles={["HOST"]}>
+                  <CreateServicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path=":id/edit"
+              element={
+                <ProtectedRoute allowedRoles={["HOST", "ADMIN"]}>
+                  <EditServicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="pending"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <PendingServicesPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
         </Route>
 

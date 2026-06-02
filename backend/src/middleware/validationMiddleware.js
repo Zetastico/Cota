@@ -109,6 +109,63 @@ export const updateUserValidation = [
   validateResults,
 ];
 
+
+/**
+ * Validaciones para crear servicios
+ */
+export const createServiceValidation = [
+  body('title')
+    .trim()
+    .notEmpty().withMessage('El título es obligatorio.'),
+
+  body('description')
+    .trim()
+    .notEmpty().withMessage('La descripción es obligatoria.'),
+
+  body('price')
+    .isFloat({ gt: 0 })
+    .withMessage('El precio debe ser mayor que cero.'),
+
+  body('category')
+    .trim()
+    .notEmpty()
+    .withMessage('La categoría es obligatoria.'),
+
+  validateResults,
+];
+
+/**
+ * Validaciones para actualizar servicios
+ */
+export const updateServiceValidation = [
+  body('title')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('El título no puede estar vacío.'),
+
+  body('description')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('La descripción no puede estar vacía.'),
+
+  body('price')
+    .optional()
+    .isFloat({ gt: 0 })
+    .withMessage('El precio debe ser mayor que cero.'),
+
+  body('category')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('La categoría no puede estar vacía.'),
+
+  validateResults,
+];
+
+
+
 /**
  * Validación para el parámetro ID en rutas dinámicas (debe ser UUID v4)
  */

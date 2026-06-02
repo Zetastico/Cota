@@ -28,9 +28,14 @@ const UsersPage = () => {
     try {
       const response = await userService.getAllUsers();
       setUsers(response.data || []);
-    } catch (err) {
-      console.error(err);
-      setErrorMsg('No se pudo obtener la lista de usuarios. Verifica la conexión con el servidor.');
+    } catch (error) {
+        if (error.response?.status === 403) {
+          setError('No tienes permisos para acceder a esta sección.');
+        } else {
+          setError(
+            'No se pudo obtener la lista de usuarios. Verifica la conexión con el servidor.'
+          );
+        }
     } finally {
       setLoading(false);
     }

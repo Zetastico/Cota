@@ -7,7 +7,6 @@ import {
   updateUser,
   deleteUser,
 } from '../controllers/userController.js';
-import { protect } from '../middleware/authMiddleware.js';
 import {
   createUserValidation,
   updateUserValidation,

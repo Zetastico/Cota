@@ -14,6 +14,7 @@ import ServicesPage from "./pages/ServicesPage"
 import CreateServicePage from "./pages/CreateServicePage"
 import EditServicePage from "./pages/EditServicePage"
 import PendingServicesPage from "./pages/PendingServicesPage"
+import PublicServicesPage from "./pages/PublicServicesPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
 function App() {
@@ -96,6 +97,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <PendingServicesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="explore"
+              element={
+                <ProtectedRoute allowedRoles={["USER"]}>
+                  <PublicServicesPage />
                 </ProtectedRoute>
               }
             />

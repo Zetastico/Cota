@@ -34,16 +34,14 @@ export const getServiceById = async (req, res, next) => {
   }
 };
 
-/**
- * Obtener todos los servicios aprobados (Público)
- */
 export const getPublicServices = async (req, res, next) => {
   try {
-    const services = await serviceService.getPublicServices();
+    const { data, pagination } = await serviceService.getPublicServices(req.query);
     res.status(200).json({
       success: true,
-      count: services.length,
-      data: services,
+      count: data.length,
+      data,
+      pagination,
     });
   } catch (error) {
     next(error);

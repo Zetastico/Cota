@@ -128,26 +128,89 @@ const rejectService = async (id) => {
   });
 };
 
-const getPublicServices = async () => {
-  return await prisma.service.findMany({
-    where: {
-      status: 'APPROVED',
-    },
-    include: {
-      owner: {
-        select: {
-          id: true,
-          nombre: true,
-          apellido: true,
-          email: true,
-          rol: true,
+const getPublicServices = async (filters = {}) => {
+  const { search, category, sort, page = 1, limit = 10 } = filters;
+
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 10;
+  const skip = (pageNum - 1) * limitNum;
+
+  const where = {
+    status: 'APPROVED',
+  };
+
+  if (category && category !== 'Todas') {
+    where.category = {
+      equals: category,
+      mode: 'insensitive',
+    };
+  }
+
+  if (search) {
+    where.OR = [
+      {
+        title: {
+          contains: search,
+          mode: 'insensitive',
         },
       },
-    },
-    orderBy: {
+      {
+        description: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      },
+    ];
+  }
+
+  let orderBy = {
+    createdAt: 'desc',
+  };
+
+  if (sort === 'price_asc') {
+    orderBy = {
+      price: 'asc',
+    };
+  } else if (sort === 'price_desc') {
+    orderBy = {
+      price: 'desc',
+    };
+  } else if (sort === 'recent') {
+    orderBy = {
       createdAt: 'desc',
+    };
+  }
+
+  const [total, data] = await Promise.all([
+    prisma.service.count({ where }),
+    prisma.service.findMany({
+      where,
+      include: {
+        owner: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            rol: true,
+          },
+        },
+      },
+      orderBy,
+      skip,
+      take: limitNum,
+    }),
+  ]);
+
+  return {
+    data,
+    pagination: {
+      total,
+      page: pageNum,
+      limit: limitNum,
+      pages: Math.ceil(total / limitNum),
     },
-  });
+  };
 };
 
 const getMyServices = async (ownerId) => {

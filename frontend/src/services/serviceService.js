@@ -2,9 +2,17 @@ import api from './api.js';
 
 /**
  * Obtener todos los servicios aprobados (Público)
+ * @param {Object} filters - { search, category, sort, page, limit }
  */
-const getPublicServices = async () => {
-  const response = await api.get('/api/services/public');
+const getPublicServices = async (filters = {}) => {
+  const params = new URLSearchParams();
+  if (filters.search) params.append('search', filters.search);
+  if (filters.category) params.append('category', filters.category);
+  if (filters.sort) params.append('sort', filters.sort);
+  if (filters.page) params.append('page', filters.page);
+  if (filters.limit) params.append('limit', filters.limit);
+
+  const response = await api.get(`/api/services/public?${params.toString()}`);
   return response.data;
 };
 

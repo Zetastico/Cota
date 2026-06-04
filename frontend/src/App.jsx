@@ -16,6 +16,7 @@ import EditServicePage from "./pages/EditServicePage"
 import PendingServicesPage from "./pages/PendingServicesPage"
 import PublicServicesPage from "./pages/PublicServicesPage"
 import MyServiceRequestsPage from "./pages/MyServiceRequestsPage"
+import MyRequestsPage from "./pages/MyRequestsPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
 function App() {
@@ -73,6 +74,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["HOST"]}>
                 <MyServiceRequestsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* My requests history (User only) */}
+          <Route
+            path="my-requests"
+            element={
+              <ProtectedRoute allowedRoles={["USER"]}>
+                <MyRequestsPage />
               </ProtectedRoute>
             }
           />

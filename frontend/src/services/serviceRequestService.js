@@ -35,9 +35,18 @@ const rejectRequest = async (id) => {
   return response.data;
 };
 
+/**
+ * Obtener solicitudes realizadas por el USER autenticado
+ */
+const getMyRequests = async () => {
+  const response = await api.get('/api/service-requests/my-requests');
+  return response.data;
+};
+
 export default {
   createRequest,
   getMyServiceRequests,
   acceptRequest,
   rejectRequest,
+  getMyRequests,
 };

@@ -4,6 +4,7 @@ import {
   getMyServiceRequests,
   acceptRequest,
   rejectRequest,
+  getMyRequests,
 } from '../controllers/serviceRequestController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 import {
@@ -12,6 +13,14 @@ import {
 } from '../middleware/validationMiddleware.js';
 
 const router = express.Router();
+
+// GET /api/service-requests/my-requests - Ver solicitudes enviadas (Solo USER)
+router.get(
+  '/my-requests',
+  protect,
+  authorize('USER'),
+  getMyRequests
+);
 
 // Todas las rutas de solicitudes requieren inicio de sesión
 router.use(protect);

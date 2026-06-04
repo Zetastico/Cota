@@ -172,9 +172,42 @@ const rejectRequest = async (id, hostId) => {
   });
 };
 
+/**
+ * Obtener solicitudes realizadas por el USER autenticado
+ */
+const getMyRequests = async (userId) => {
+  return await prisma.serviceRequest.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      service: {
+        select: {
+          id: true,
+          title: true,
+          price: true,
+          category: true,
+          owner: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+};
+
 export default {
   createRequest,
   getMyServiceRequests,
   acceptRequest,
   rejectRequest,
+  getMyRequests,
 };

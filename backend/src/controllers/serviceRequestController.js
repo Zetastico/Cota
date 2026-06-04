@@ -76,3 +76,19 @@ export const rejectRequest = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Obtener solicitudes realizadas por el USER autenticado
+ */
+export const getMyRequests = async (req, res, next) => {
+  try {
+    const requests = await serviceRequestService.getMyRequests(req.user.id);
+    res.status(200).json({
+      success: true,
+      count: requests.length,
+      data: requests,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

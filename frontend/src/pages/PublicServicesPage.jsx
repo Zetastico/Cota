@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import serviceService from '../services/serviceService.js';
+import RequestServiceModal from '../components/RequestServiceModal.jsx';
+import useAuth from '../hooks/useAuth.js';
 
 const categories = ["Todas", "Educación", "Tecnología", "Música", "Limpieza", "Salud", "Hogar"];
 
@@ -7,6 +9,7 @@ const categories = ["Todas", "Educación", "Tecnología", "Música", "Limpieza",
  * Vista para que los demandantes (USER) exploren, busquen, filtren y ordenen servicios aprobados.
  */
 const PublicServicesPage = () => {
+  const { user: currentUser } = useAuth();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -20,6 +23,10 @@ const PublicServicesPage = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+
+  // Estados del Modal
+  const [selectedService, setSelectedService] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Resetear a página 1 al cambiar filtros principales
@@ -54,6 +61,11 @@ const PublicServicesPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRequestClick = (service) => {
+    setSelectedService(service);
+    setIsModalOpen(true);
   };
 
   return (
@@ -143,60 +155,66 @@ const PublicServicesPage = () => {
         <div className="space-y-6">
           {/* Grid de Tarjetas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                className="bg-white border border-slate-150 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all duration-200"
-              >
-                <div className="space-y-3">
-                  {/* Categoría y Precio */}
-                  <div className="flex items-center justify-between">
-                    <span className="bg-indigo-50/70 text-indigo-600 border border-indigo-100 text-2xs font-semibold px-2.5 py-0.5 rounded-full">
-                      {service.category}
-                    </span>
-                    <span className="text-sm font-extrabold text-indigo-600 bg-indigo-50/40 px-3 py-1 rounded-lg">
-                      ${service.price.toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Título y Descripción */}
-                  <div>
-                    <h3 className="font-bold text-slate-800 text-sm hover:text-indigo-600 transition-colors">
-                      {service.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-3">
-                      {service.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Footer de Tarjeta con Proveedor y Botón Solicitar */}
-                <div className="border-t border-slate-100 mt-5 pt-4 flex items-center justify-between gap-4">
-                  {/* Host Info */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs">
-                      {service.owner?.nombre[0] || 'T'}
-                      {service.owner?.apellido[0] || 'L'}
+            {services.map((service) => {
+              const isOwner = currentUser && currentUser.id === service.ownerId;
+              return (
+                <div
+                  key={service.id}
+                  className="bg-white border border-slate-150 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all duration-200"
+                >
+                  <div className="space-y-3">
+                    {/* Categoría y Precio */}
+                    <div className="flex items-center justify-between">
+                      <span className="bg-indigo-50/70 text-indigo-600 border border-indigo-100 text-2xs font-semibold px-2.5 py-0.5 rounded-full">
+                        {service.category}
+                      </span>
+                      <span className="text-sm font-extrabold text-indigo-600 bg-indigo-50/40 px-3 py-1 rounded-lg">
+                        ${service.price.toFixed(2)}
+                      </span>
                     </div>
+
+                    {/* Título y Descripción */}
                     <div>
-                      <p className="text-2xs font-semibold text-slate-700 leading-none">
-                        {service.owner ? `${service.owner.nombre} ${service.owner.apellido}` : 'Talento Local'}
+                      <h3 className="font-bold text-slate-800 text-sm hover:text-indigo-600 transition-colors">
+                        {service.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-3">
+                        {service.description}
                       </p>
-                      <p className="text-3xs text-slate-400 mt-0.5">Host de la comunidad</p>
                     </div>
                   </div>
 
-                  {/* Botón de Acción (Preparado para Sprint posterior) */}
-                  <button
-                    disabled
-                    className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-3xs font-bold border border-slate-200 cursor-not-allowed hover:bg-slate-100 transition-all flex-shrink-0"
-                    title="Solicitudes próximamente"
-                  >
-                    Solicitar Servicio
-                  </button>
+                  {/* Footer de Tarjeta con Proveedor y Botón Solicitar */}
+                  <div className="border-t border-slate-100 mt-5 pt-4 flex items-center justify-between gap-4">
+                    {/* Host Info */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs">
+                        {service.owner?.nombre[0] || 'T'}
+                        {service.owner?.apellido[0] || 'L'}
+                      </div>
+                      <div>
+                        <p className="text-2xs font-semibold text-slate-700 leading-none">
+                          {service.owner ? `${service.owner.nombre} ${service.owner.apellido}` : 'Talento Local'}
+                        </p>
+                        <p className="text-3xs text-slate-400 mt-0.5">Host de la comunidad</p>
+                      </div>
+                    </div>
+
+                    {/* Botón de Acción */}
+                    {isOwner ? (
+                      <span className="text-3xs text-slate-400 font-semibold italic">Tu Servicio</span>
+                    ) : (
+                      <button
+                        onClick={() => handleRequestClick(service)}
+                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-3xs font-bold shadow-xs hover:shadow active:scale-98 transition-all flex-shrink-0"
+                      >
+                        Solicitar Servicio
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Controles de Paginación */}
@@ -223,6 +241,17 @@ const PublicServicesPage = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Modal de Solicitud */}
+      {isModalOpen && selectedService && (
+        <RequestServiceModal
+          service={selectedService}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedService(null);
+          }}
+        />
       )}
     </div>
   );

@@ -33,6 +33,7 @@ model User {
   rol       Role     @default(USER)
 
   services  Service[]
+  requests  ServiceRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -53,7 +54,31 @@ model Service {
 
   ownerId     String
   owner       User          @relation(fields: [ownerId], references: [id])
+  requests    ServiceRequest[]
 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model ServiceRequest {
+  id           String        @id @default(uuid())
+  serviceId    String
+  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message      String
+  contactPhone String
+  desiredDate  DateTime
+  status       RequestStatus @default(PENDING)
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("service_requests")
 }

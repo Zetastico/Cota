@@ -15,6 +15,7 @@ import CreateServicePage from "./pages/CreateServicePage"
 import EditServicePage from "./pages/EditServicePage"
 import PendingServicesPage from "./pages/PendingServicesPage"
 import PublicServicesPage from "./pages/PublicServicesPage"
+import MyServiceRequestsPage from "./pages/MyServiceRequestsPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
 function App() {
@@ -65,6 +66,16 @@ function App() {
               }
             />
           </Route>
+
+          {/* Service requests (Host only) */}
+          <Route
+            path="service-requests"
+            element={
+              <ProtectedRoute allowedRoles={["HOST"]}>
+                <MyServiceRequestsPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Service management */}
           <Route path="services">

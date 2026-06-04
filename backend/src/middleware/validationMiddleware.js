@@ -174,3 +174,24 @@ export const idParamValidation = [
     .isUUID(4).withMessage('El parámetro ID debe ser un UUID v4 válido.'),
   validateResults,
 ];
+
+/**
+ * Validaciones para crear solicitudes de servicios
+ */
+export const createRequestValidation = [
+  body('serviceId')
+    .trim()
+    .notEmpty().withMessage('El ID del servicio es obligatorio.')
+    .isUUID(4).withMessage('El ID del servicio debe ser un UUID v4 válido.'),
+  body('message')
+    .trim()
+    .notEmpty().withMessage('El mensaje para el proveedor es obligatorio.'),
+  body('contactPhone')
+    .trim()
+    .notEmpty().withMessage('El teléfono de contacto es obligatorio.')
+    .isLength({ min: 7 }).withMessage('El teléfono debe tener al menos 7 dígitos.'),
+  body('desiredDate')
+    .notEmpty().withMessage('La fecha deseada de ejecución es obligatoria.')
+    .isISO8601().withMessage('Debe proporcionar una fecha en formato ISO8601 válido (AAAA-MM-DD).'),
+  validateResults,
+];

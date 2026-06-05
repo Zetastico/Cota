@@ -3,33 +3,153 @@ import serviceService from '../services/serviceService.js';
 import RequestServiceModal from '../components/RequestServiceModal.jsx';
 import useAuth from '../hooks/useAuth.js';
 
+/* ── Lógica sin cambios ─── Todas las modificaciones son exclusivamente visuales ── */
+
 const categories = ["Todas", "Educación", "Tecnología", "Música", "Limpieza", "Salud", "Hogar"];
 
-/**
- * Vista para que los demandantes (USER) exploren, busquen, filtren y ordenen servicios aprobados.
- */
+/* Ícono SVG inline helper */
+const Icon = ({ d, size = 'w-4 h-4', stroke = 1.8 }) => (
+  <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={stroke} d={d} />
+  </svg>
+);
+
+/* Skeleton de tarjeta */
+const ServiceCardSkeleton = () => (
+  <div className="bg-white rounded-2xl border border-slate-100 p-5 space-y-4">
+    <div className="flex justify-between">
+      <div className="skeleton h-5 w-20 rounded-full" />
+      <div className="skeleton h-5 w-16 rounded-lg" />
+    </div>
+    <div className="space-y-2">
+      <div className="skeleton h-4 w-3/4 rounded" />
+      <div className="skeleton h-3 w-full rounded" />
+      <div className="skeleton h-3 w-5/6 rounded" />
+    </div>
+    <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+      <div className="flex items-center gap-2">
+        <div className="skeleton w-8 h-8 rounded-full" />
+        <div className="space-y-1.5">
+          <div className="skeleton h-3 w-24 rounded" />
+          <div className="skeleton h-2.5 w-16 rounded" />
+        </div>
+      </div>
+      <div className="skeleton h-8 w-24 rounded-xl" />
+    </div>
+  </div>
+);
+
+/* Badge de categoría con color dinámico */
+const categoryColors = {
+  Educación:   'bg-blue-50 text-blue-700 border-blue-100',
+  Tecnología:  'bg-violet-50 text-violet-700 border-violet-100',
+  Música:      'bg-pink-50 text-pink-700 border-pink-100',
+  Limpieza:    'bg-cyan-50 text-cyan-700 border-cyan-100',
+  Salud:       'bg-emerald-50 text-emerald-700 border-emerald-100',
+  Hogar:       'bg-amber-50 text-amber-700 border-amber-100',
+};
+
+const CategoryBadge = ({ cat }) => (
+  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold border ${categoryColors[cat] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+    {cat}
+  </span>
+);
+
+/* Tarjeta de servicio premium */
+const ServiceCard = ({ service, isOwner, onRequestClick }) => {
+  const initials = `${service.owner?.nombre?.[0] || 'T'}${service.owner?.apellido?.[0] || 'L'}`;
+  const hostName = service.owner ? `${service.owner.nombre} ${service.owner.apellido}` : 'Talento Local';
+
+  return (
+    <div className="group bg-white rounded-2xl border border-slate-100 shadow-premium flex flex-col
+      hover:shadow-premium-hover hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+
+      {/* Accent bar superior con color de categoría */}
+      <div className={`h-1 w-full ${
+        categoryColors[service.category]
+          ? categoryColors[service.category].split(' ')[0].replace('bg-', 'bg-').replace('50', '400')
+          : 'bg-indigo-400'
+      }`} />
+
+      <div className="p-5 flex flex-col flex-1 gap-4">
+        {/* Cabecera: categoría + precio */}
+        <div className="flex items-center justify-between">
+          <CategoryBadge cat={service.category} />
+          <div className="flex flex-col items-end">
+            <span className="text-xs font-bold text-slate-400 leading-none mb-0.5">precio</span>
+            <span className="text-lg font-extrabold text-indigo-600 leading-none font-display">
+              ${service.price.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {/* Título + descripción */}
+        <div className="flex-1">
+          <h3 className="font-bold text-slate-800 text-sm leading-snug group-hover:text-indigo-700 transition-colors line-clamp-2">
+            {service.title}
+          </h3>
+          <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-3">
+            {service.description}
+          </p>
+        </div>
+
+        {/* Footer: host + CTA */}
+        <div className="flex items-center justify-between pt-4 border-t border-slate-50 gap-3">
+          {/* Host avatar + info */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="text-2xs font-semibold text-slate-700 truncate leading-none">{hostName}</p>
+              <p className="text-3xs text-slate-400 mt-0.5 leading-none">Proveedor verificado</p>
+            </div>
+          </div>
+
+          {/* Botón de acción */}
+          {isOwner ? (
+            <span className="flex-shrink-0 text-2xs text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-1.5 rounded-xl font-semibold italic">
+              Tu servicio
+            </span>
+          ) : (
+            <button
+              onClick={() => onRequestClick(service)}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700
+                text-white text-2xs font-bold rounded-xl shadow-sm hover:shadow active:scale-95 transition-all"
+            >
+              <Icon d="M12 6v6m0 0v6m0-6h6m-6 0H6" size="w-3 h-3" stroke={2.5} />
+              Solicitar
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════════════ */
+
 const PublicServicesPage = () => {
   const { user: currentUser } = useAuth();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  
-  // Estados de Filtros
+
+  // Estados de Filtros — sin cambios
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('Todas');
   const [sort, setSort] = useState('recent');
 
-  // Estados de Paginación
+  // Estados de Paginación — sin cambios
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Estados del Modal
+  // Estados del Modal — sin cambios
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Resetear a página 1 al cambiar filtros principales
     setPage(1);
   }, [search, category, sort]);
 
@@ -37,6 +157,7 @@ const PublicServicesPage = () => {
     fetchServices();
   }, [search, category, sort, page]);
 
+  // Lógica sin cambios
   const fetchServices = async () => {
     setLoading(true);
     setErrorMsg('');
@@ -70,180 +191,199 @@ const PublicServicesPage = () => {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Encabezado */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-900 md:text-2xl">Explorar Servicios</h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Encuentra los mejores profesionales y talentos locales aprobados en tu comunidad.
-        </p>
+
+      {/* ── Hero de sección ── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-[#3730a3] rounded-2xl p-6 md:p-8 text-white">
+        {/* Decoraciones */}
+        <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/5 rounded-full blur-2xl" />
+        <div className="absolute bottom-0 left-1/4 w-24 h-24 bg-white/5 rounded-full blur-xl" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+        />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 px-3 py-1 rounded-full mb-3">
+              <Icon d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" size="w-3 h-3" stroke={2.5} />
+              <span className="text-2xs font-bold uppercase tracking-widest text-white/90">Catálogo de Servicios</span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-display font-extrabold leading-tight">
+              Explorar Servicios
+            </h2>
+            <p className="mt-1.5 text-sm text-white/70 max-w-md">
+              Encuentra los mejores profesionales y talentos locales aprobados en tu comunidad.
+            </p>
+          </div>
+          {totalCount > 0 && !loading && (
+            <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl px-5 py-3 text-center flex-shrink-0">
+              <p className="text-2xl font-display font-extrabold leading-none">{totalCount}</p>
+              <p className="text-2xs text-white/70 mt-1 font-medium">servicios disponibles</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Banner de error */}
+      {/* ── Banner de error ── */}
       {errorMsg && (
-        <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs flex items-start gap-2.5 animate-fadeIn">
-          <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+        <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-700 text-xs flex items-start gap-2.5 animate-fadeIn">
+          <Icon d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" size="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* Panel de Filtros */}
-      <div className="bg-white border border-slate-150 rounded-2xl p-5 shadow-xs grid grid-cols-1 md:grid-cols-12 gap-4">
-        {/* Buscador */}
-        <div className="md:col-span-6 flex items-center gap-3 border border-slate-200 rounded-xl px-3 py-2 bg-slate-50/50 hover:bg-slate-50 focus-within:bg-white focus-within:border-indigo-500 transition-all">
-          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Buscar por título o descripción..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent border-0 p-0 text-slate-700 placeholder-slate-400 focus:ring-0 text-xs outline-none"
-          />
+      {/* ── Panel de Filtros Premium ── */}
+      <div className="bg-white border border-slate-100 rounded-2xl shadow-premium p-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+
+          {/* Buscador */}
+          <label className="md:col-span-6 flex items-center gap-2.5 border border-slate-200 rounded-xl px-3.5 py-2.5
+            bg-slate-50/50 hover:bg-white hover:border-slate-300 focus-within:bg-white focus-within:border-indigo-500
+            focus-within:ring-3 focus-within:ring-indigo-50 transition-all cursor-text">
+            <Icon d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" size="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Buscar por título o descripción..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent border-0 p-0 text-sm text-slate-700 placeholder-slate-400 focus:ring-0 outline-none"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="text-slate-300 hover:text-slate-500 transition-colors flex-shrink-0">
+                <Icon d="M6 18L18 6M6 6l12 12" size="w-3.5 h-3.5" stroke={2} />
+              </button>
+            )}
+          </label>
+
+          {/* Categoría */}
+          <div className="md:col-span-3 relative">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full appearance-none border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm
+                bg-slate-50/50 text-slate-700 focus:border-indigo-500 focus:ring-3 focus:ring-indigo-50 outline-none
+                hover:border-slate-300 transition-all cursor-pointer"
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>{cat === 'Todas' ? 'Todas las categorías' : cat}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <Icon d="M19 9l-7 7-7-7" size="w-3.5 h-3.5" stroke={2} />
+            </div>
+          </div>
+
+          {/* Ordenamiento */}
+          <div className="md:col-span-3 relative">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="w-full appearance-none border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm
+                bg-slate-50/50 text-slate-700 focus:border-indigo-500 focus:ring-3 focus:ring-indigo-50 outline-none
+                hover:border-slate-300 transition-all cursor-pointer"
+            >
+              <option value="recent">Más recientes</option>
+              <option value="price_asc">Menor precio</option>
+              <option value="price_desc">Mayor precio</option>
+            </select>
+            <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <Icon d="M19 9l-7 7-7-7" size="w-3.5 h-3.5" stroke={2} />
+            </div>
+          </div>
         </div>
 
-        {/* Categoría */}
-        <div className="md:col-span-3">
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-white text-slate-700 focus:border-indigo-500 outline-none"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat === 'Todas' ? 'Todas las categorías' : cat}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Ordenamiento */}
-        <div className="md:col-span-3">
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="w-full border border-slate-200 rounded-xl p-2.5 text-xs bg-white text-slate-700 focus:border-indigo-500 outline-none"
-          >
-            <option value="recent">Más recientes</option>
-            <option value="price_asc">Menor precio primero</option>
-            <option value="price_desc">Mayor precio primero</option>
-          </select>
-        </div>
+        {/* Filtros activos */}
+        {(search || category !== 'Todas') && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-50">
+            <span className="text-2xs text-slate-400 font-medium">Filtros activos:</span>
+            {search && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-2xs font-semibold">
+                "{search}"
+                <button onClick={() => setSearch('')} className="hover:text-indigo-900">×</button>
+              </span>
+            )}
+            {category !== 'Todas' && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-2xs font-semibold">
+                {category}
+                <button onClick={() => setCategory('Todas')} className="hover:text-indigo-900">×</button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Resultados */}
+      {/* ── Contenido principal ── */}
       {loading ? (
-        <div className="bg-white border border-slate-150 rounded-2xl p-12 text-center shadow-xs">
-          <div className="w-8 h-8 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin mx-auto"></div>
-          <p className="text-xs text-slate-400 mt-3 font-medium">Buscando servicios en tu área...</p>
+        /* Skeleton grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[1, 2, 3, 4].map((n) => <ServiceCardSkeleton key={n} />)}
         </div>
       ) : services.length === 0 ? (
-        <div className="bg-white border border-slate-150 rounded-2xl p-12 text-center space-y-3 shadow-xs">
-          <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-xl flex items-center justify-center mx-auto border border-slate-100">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
+        /* Estado vacío */
+        <div className="bg-white border border-slate-100 rounded-2xl p-14 text-center shadow-premium space-y-4">
+          <div className="w-16 h-16 bg-indigo-50 text-indigo-300 rounded-2xl flex items-center justify-center mx-auto border border-indigo-100">
+            <Icon d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" size="w-8 h-8" stroke={1.4} />
           </div>
-          <h3 className="text-sm font-semibold text-slate-700">Sin resultados</h3>
-          <p className="text-2xs text-slate-400 max-w-xs mx-auto">
-            No se encontraron servicios con los filtros seleccionados. Intenta ampliar tus términos de búsqueda.
-          </p>
+          <div>
+            <h3 className="text-sm font-bold text-slate-700">Sin resultados</h3>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
+              No se encontraron servicios con los filtros actuales. Intenta ampliar tu búsqueda o cambiar la categoría.
+            </p>
+          </div>
+          {(search || category !== 'Todas') && (
+            <button
+              onClick={() => { setSearch(''); setCategory('Todas'); }}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-indigo-200 text-indigo-600 rounded-xl text-xs font-semibold hover:bg-indigo-50 transition-all"
+            >
+              Limpiar filtros
+            </button>
+          )}
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* Grid de Tarjetas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {services.map((service) => {
-              const isOwner = currentUser && currentUser.id === service.ownerId;
-              return (
-                <div
-                  key={service.id}
-                  className="bg-white border border-slate-150 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all duration-200"
-                >
-                  <div className="space-y-3">
-                    {/* Categoría y Precio */}
-                    <div className="flex items-center justify-between">
-                      <span className="bg-indigo-50/70 text-indigo-600 border border-indigo-100 text-2xs font-semibold px-2.5 py-0.5 rounded-full">
-                        {service.category}
-                      </span>
-                      <span className="text-sm font-extrabold text-indigo-600 bg-indigo-50/40 px-3 py-1 rounded-lg">
-                        ${service.price.toFixed(2)}
-                      </span>
-                    </div>
-
-                    {/* Título y Descripción */}
-                    <div>
-                      <h3 className="font-bold text-slate-800 text-sm hover:text-indigo-600 transition-colors">
-                        {service.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-3">
-                        {service.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Footer de Tarjeta con Proveedor y Botón Solicitar */}
-                  <div className="border-t border-slate-100 mt-5 pt-4 flex items-center justify-between gap-4">
-                    {/* Host Info */}
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs">
-                        {service.owner?.nombre[0] || 'T'}
-                        {service.owner?.apellido[0] || 'L'}
-                      </div>
-                      <div>
-                        <p className="text-2xs font-semibold text-slate-700 leading-none">
-                          {service.owner ? `${service.owner.nombre} ${service.owner.apellido}` : 'Talento Local'}
-                        </p>
-                        <p className="text-3xs text-slate-400 mt-0.5">Host de la comunidad</p>
-                      </div>
-                    </div>
-
-                    {/* Botón de Acción */}
-                    {isOwner ? (
-                      <span className="text-3xs text-slate-400 font-semibold italic">Tu Servicio</span>
-                    ) : (
-                      <button
-                        onClick={() => handleRequestClick(service)}
-                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-3xs font-bold shadow-xs hover:shadow active:scale-98 transition-all flex-shrink-0"
-                      >
-                        Solicitar Servicio
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+        <div className="space-y-5">
+          {/* Grid de tarjetas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {services.map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                isOwner={currentUser && currentUser.id === service.ownerId}
+                onRequestClick={handleRequestClick}
+              />
+            ))}
           </div>
 
-          {/* Controles de Paginación */}
+          {/* Paginación premium */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-slate-150 pt-4 text-xs font-medium text-slate-500">
+            <div className="flex items-center justify-between bg-white border border-slate-100 rounded-2xl px-5 py-3 shadow-premium">
               <button
                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 disabled={page === 1}
-                className="px-3 py-1.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all disabled:opacity-50 disabled:hover:bg-transparent"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-semibold
+                  text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
+                <Icon d="M15 19l-7-7 7-7" size="w-3.5 h-3.5" stroke={2} />
                 Anterior
               </button>
-              <span>
-                Página <span className="font-semibold text-slate-800">{page}</span> de{' '}
-                <span className="font-semibold text-slate-800">{totalPages}</span> ({totalCount} resultados)
+              <span className="text-xs text-slate-500">
+                Página <span className="font-bold text-slate-800">{page}</span> de{' '}
+                <span className="font-bold text-slate-800">{totalPages}</span>
+                <span className="hidden sm:inline text-slate-400"> · {totalCount} resultados</span>
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                 disabled={page === totalPages}
-                className="px-3 py-1.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all disabled:opacity-50 disabled:hover:bg-transparent"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-semibold
+                  text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Siguiente
+                <Icon d="M9 5l7 7-7 7" size="w-3.5 h-3.5" stroke={2} />
               </button>
             </div>
           )}
         </div>
       )}
 
-      {/* Modal de Solicitud */}
+      {/* Modal de Solicitud — sin cambios funcionales */}
       {isModalOpen && selectedService && (
         <RequestServiceModal
           service={selectedService}

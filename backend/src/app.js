@@ -12,6 +12,7 @@ app.use(
     origin: [
       'http://localhost:5173',
       'https://cota-frontend.vercel.app',
+      'https://cotal-render.onrender.com',
     ],
     credentials: true,
   })

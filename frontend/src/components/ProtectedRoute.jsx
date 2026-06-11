@@ -45,7 +45,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
             Tu rol actual (<span className="font-semibold text-slate-700">{user.rol}</span>) no tiene los privilegios necesarios para ver esta página.
           </p>
           <a
-            href="/dashboard"
+            href={user?.rol === 'USER' ? '/services/explore' : '/dashboard'}
             className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all duration-200"
           >
             Volver al Inicio

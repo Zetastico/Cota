@@ -1,12 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import useAuth from "./hooks/useAuth.js"
 
 import ProtectedRoute from "./components/ProtectedRoute"
 
 import DashboardLayout from "./layouts/DashboardLayout"
+import UserTopbarLayout from "./layouts/UserTopbarLayout"
 
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import DashboardPage from "./pages/DashboardPage"
+import UserOverviewPage from "./pages/UserOverviewPage"
 import UsersPage from "./pages/UsersPage"
 import CreateUserPage from "./pages/CreateUserPage"
 import EditUserPage from "./pages/EditUserPage"
@@ -18,6 +21,23 @@ import PublicServicesPage from "./pages/PublicServicesPage"
 import MyServiceRequestsPage from "./pages/MyServiceRequestsPage"
 import MyRequestsPage from "./pages/MyRequestsPage"
 import NotFoundPage from "./pages/NotFoundPage"
+
+const DynamicLayout = () => {
+  const { user } = useAuth();
+  if (user?.rol === "USER") {
+    return <UserTopbarLayout />;
+  }
+  return <DashboardLayout />;
+};
+
+const RootRedirect = () => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.rol === "USER") {
+    return <Navigate to="/services/explore" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
+};
 
 function App() {
   return (
@@ -32,13 +52,22 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <DashboardLayout />
+              <DynamicLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route index element={<RootRedirect />} />
 
           <Route path="dashboard" element={<DashboardPage />} />
+          
+          <Route
+            path="my-overview"
+            element={
+              <ProtectedRoute allowedRoles={["USER"]}>
+                <UserOverviewPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* User management (Admin only) */}
           <Route path="users">

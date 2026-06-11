@@ -2,10 +2,27 @@ import { useEffect, useState } from 'react';
 import serviceService from '../services/serviceService.js';
 import RequestServiceModal from '../components/RequestServiceModal.jsx';
 import useAuth from '../hooks/useAuth.js';
+import { getCategoryImage } from '../services/categoryImages.js';
 
 /* ── Lógica sin cambios ─── Todas las modificaciones son exclusivamente visuales ── */
 
-const categories = ["Todas", "Educación", "Tecnología", "Música", "Limpieza", "Salud", "Hogar"];
+const categories = [
+  "Todas",
+  "Educación",
+  "Tecnología",
+  "Música",
+  "Limpieza",
+  "Salud",
+  "Hogar",
+  "Cocina",
+  "Arte",
+  "Deporte",
+  "Belleza",
+  "Fotografía",
+  "Transporte",
+  "Reparación",
+  "Mascotas"
+];
 
 /* Ícono SVG inline helper */
 const Icon = ({ d, size = 'w-4 h-4', stroke = 1.8 }) => (
@@ -16,25 +33,28 @@ const Icon = ({ d, size = 'w-4 h-4', stroke = 1.8 }) => (
 
 /* Skeleton de tarjeta */
 const ServiceCardSkeleton = () => (
-  <div className="bg-white rounded-2xl border border-slate-100 p-5 space-y-4">
-    <div className="flex justify-between">
-      <div className="skeleton h-5 w-20 rounded-full" />
-      <div className="skeleton h-5 w-16 rounded-lg" />
-    </div>
-    <div className="space-y-2">
-      <div className="skeleton h-4 w-3/4 rounded" />
-      <div className="skeleton h-3 w-full rounded" />
-      <div className="skeleton h-3 w-5/6 rounded" />
-    </div>
-    <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-      <div className="flex items-center gap-2">
-        <div className="skeleton w-8 h-8 rounded-full" />
-        <div className="space-y-1.5">
-          <div className="skeleton h-3 w-24 rounded" />
-          <div className="skeleton h-2.5 w-16 rounded" />
-        </div>
+  <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-premium animate-pulse flex flex-col">
+    <div className="h-44 bg-slate-200 w-full" />
+    <div className="p-5 space-y-4 flex-1">
+      <div className="flex justify-between items-center">
+        <div className="h-4 bg-slate-200 w-20 rounded-full" />
+        <div className="h-4 bg-slate-200 w-16 rounded" />
       </div>
-      <div className="skeleton h-8 w-24 rounded-xl" />
+      <div className="space-y-2">
+        <div className="h-4 bg-slate-200 w-3/4 rounded" />
+        <div className="h-3 bg-slate-200 w-full rounded" />
+        <div className="h-3 bg-slate-200 w-5/6 rounded" />
+      </div>
+      <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-slate-200" />
+          <div className="space-y-1">
+            <div className="h-3 bg-slate-200 w-16 rounded" />
+            <div className="h-2 bg-slate-200 w-12 rounded" />
+          </div>
+        </div>
+        <div className="h-8 bg-slate-200 w-20 rounded-xl" />
+      </div>
     </div>
   </div>
 );
@@ -47,6 +67,14 @@ const categoryColors = {
   Limpieza:    'bg-cyan-50 text-cyan-700 border-cyan-100',
   Salud:       'bg-emerald-50 text-emerald-700 border-emerald-100',
   Hogar:       'bg-amber-50 text-amber-700 border-amber-100',
+  Cocina:      'bg-orange-50 text-orange-700 border-orange-100',
+  Arte:        'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100',
+  Deporte:     'bg-red-50 text-red-700 border-red-100',
+  Belleza:     'bg-rose-50 text-rose-700 border-rose-100',
+  Fotografía:  'bg-teal-50 text-teal-700 border-teal-100',
+  Transporte:  'bg-sky-50 text-sky-700 border-sky-100',
+  Reparación:  'bg-yellow-50 text-yellow-700 border-yellow-100',
+  Mascotas:    'bg-lime-50 text-lime-700 border-lime-100',
 };
 
 const CategoryBadge = ({ cat }) => (
@@ -62,41 +90,51 @@ const ServiceCard = ({ service, isOwner, onRequestClick }) => {
 
   return (
     <div className="group bg-white rounded-2xl border border-slate-100 shadow-premium flex flex-col
-      hover:shadow-premium-hover hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+      hover:shadow-premium-hover hover:border-indigo-150 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
 
-      {/* Accent bar superior con color de categoría */}
-      <div className={`h-1 w-full ${
-        categoryColors[service.category]
-          ? categoryColors[service.category].split(' ')[0].replace('bg-', 'bg-').replace('50', '400')
-          : 'bg-indigo-400'
-      }`} />
-
-      <div className="p-5 flex flex-col flex-1 gap-4">
-        {/* Cabecera: categoría + precio */}
-        <div className="flex items-center justify-between">
+      {/* Imagen Superior por Categoría */}
+      <div className="relative h-44 w-full bg-slate-50 overflow-hidden">
+        <img
+          src={getCategoryImage(service.category)}
+          alt={service.category}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://images.unsplash.com/photo-1557683316-973673baf926?w=600&auto=format&fit=crop&q=80';
+          }}
+        />
+        {/* Overlay gradiente */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+        
+        {/* Categoría Badge sobre la imagen */}
+        <div className="absolute top-4 left-4 z-10">
           <CategoryBadge cat={service.category} />
-          <div className="flex flex-col items-end">
-            <span className="text-xs font-bold text-slate-400 leading-none mb-0.5">precio</span>
-            <span className="text-lg font-extrabold text-indigo-600 leading-none font-display">
+        </div>
+      </div>
+
+      <div className="p-5 flex flex-col flex-1 gap-3">
+        {/* Título + Precio */}
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="font-bold text-slate-800 text-sm leading-snug group-hover:text-indigo-700 transition-colors line-clamp-2 flex-1">
+            {service.title}
+          </h3>
+          <div className="text-right flex-shrink-0">
+            <span className="text-3xs font-bold text-slate-400 uppercase tracking-wider block">precio</span>
+            <span className="text-base font-extrabold text-indigo-600 font-display block leading-none mt-0.5">
               ${service.price.toFixed(2)}
             </span>
           </div>
         </div>
 
-        {/* Título + descripción */}
-        <div className="flex-1">
-          <h3 className="font-bold text-slate-800 text-sm leading-snug group-hover:text-indigo-700 transition-colors line-clamp-2">
-            {service.title}
-          </h3>
-          <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-3">
-            {service.description}
-          </p>
-        </div>
+        {/* Descripción */}
+        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 flex-1">
+          {service.description}
+        </p>
 
         {/* Footer: host + CTA */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-50 gap-3">
+        <div className="flex items-center justify-between pt-3 border-t border-slate-50 gap-3">
           {/* Host avatar + info */}
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm">
               {initials}
             </div>
@@ -108,7 +146,7 @@ const ServiceCard = ({ service, isOwner, onRequestClick }) => {
 
           {/* Botón de acción */}
           {isOwner ? (
-            <span className="flex-shrink-0 text-2xs text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-1.5 rounded-xl font-semibold italic">
+            <span className="flex-shrink-0 text-2xs text-slate-400 bg-slate-50 border border-slate-105 px-2.5 py-1.5 rounded-xl font-semibold italic">
               Tu servicio
             </span>
           ) : (

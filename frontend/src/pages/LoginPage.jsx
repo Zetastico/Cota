@@ -40,9 +40,13 @@ const LoginPage = () => {
 
     setIsSubmitting(true);
     try {
-      await login(email, password);
-      // Éxito: redireccionar al dashboard
-      navigate('/dashboard');
+      const userData = await login(email, password);
+      // Éxito: redireccionar según rol
+      if (userData?.rol === 'USER') {
+        navigate('/services/explore');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error(err);
       // Intentar extraer el mensaje del error de la API

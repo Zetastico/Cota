@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.js';
 import userService from '../services/userService.js';
 import statsService from '../services/statsService.js';
@@ -168,6 +168,9 @@ const DashboardPage = () => {
   }, [user]);
 
   if (!user) return null;
+  if (user.rol === 'USER') {
+    return <Navigate to="/services/explore" replace />;
+  }
 
   // Visual Palette Colors
   const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#6366F1', '#3B82F6', '#EC4899'];

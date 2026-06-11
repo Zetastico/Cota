@@ -32,13 +32,16 @@ app.get('/', (req, res) => {
   });
 });
 
-// 3. Montar el enrutador principal bajo el prefijo /api
 app.use('/api', apiRouter);
 
-// 4. Capturar rutas inexistentes
-app.use(notFoundHandler);
+// Evita que el navegador genere error al pedir el favicon automáticamente
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
 
-// 5. Capturar errores globales y enviar respuesta unificada
+app.use(notFoundHandler);
 app.use(errorHandler);
+
+
 
 export default app;

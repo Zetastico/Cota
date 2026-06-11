@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.js';
+import statsService from '../services/statsService.js';
 
 /* ─────────────────────────────────────────────────────────────────────────
    DashboardLayout — Sidebar SaaS premium estilo Linear / Vercel / Notion
@@ -150,8 +151,28 @@ const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [hasAlerts, setHasAlerts] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    statsService.getDashboardStats()
+      .then(res => {
+        if (res.success && res.data?.stats) {
+          const s = res.data.stats;
+          if (user.rol === 'ADMIN' && s.pendingServices > 0) {
+            setHasAlerts(true);
+          } else if (user.rol === 'HOST' && s.pendingRequestsReceived > 0) {
+            setHasAlerts(true);
+          } else if (user.rol === 'USER' && s.acceptedRequests > 0) {
+            setHasAlerts(true);
+          }
+        }
+      })
+      .catch(err => console.error(err));
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -358,10 +379,24 @@ const DashboardLayout = () => {
           {/* Right side — perfil rápido */}
           <div className="flex items-center gap-3">
             {/* Indicador de entorno */}
-            <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-2xs font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-slow inline-block" />
-              Activo
+            <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-2xs font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse inline-block" />
+              Sesión Activa
             </span>
+
+            {/* Campana de Notificaciones */}
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+              title="Ver notificaciones en Dashboard"
+            >
+              <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.02 6.02 0 00-4.902-5.903m-2.127-.002A6.002 6.002 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {hasAlerts && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" />
+              )}
+            </button>
 
             {/* Avatar + nombre (desktop) */}
             {user && (

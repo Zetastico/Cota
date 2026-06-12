@@ -130,3 +130,86 @@
     background: linear-gradient(135deg, #4F46E5 0%, #4338ca 60%, #3730a3 100%);
   }
 }
+
+/* ─── Smooth Scroll ──────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ─── Marquee Animations ─────────────────────────────────────────────────── */
+@keyframes marqueeLeft {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marqueeRight {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee-track--left {
+  animation: marqueeLeft 40s linear infinite;
+}
+
+.marquee-track--right {
+  animation: marqueeRight 44s linear infinite;
+}
+
+.marquee-wrap:hover .marquee-track--left,
+.marquee-wrap:hover .marquee-track--right {
+  animation-play-state: paused;
+}
+
+/* ─── Landing page utilities ─────────────────────────────────────────────── */
+.landing-section {
+  @apply py-20 px-4 sm:px-6 lg:px-8;
+}
+
+.landing-container {
+  @apply max-w-7xl mx-auto;
+}
+
+/* Fade-in-up animation for landing sections */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.65s ease forwards;
+}
+
+.animate-fade-in-up-delay-1 {
+  animation: fadeInUp 0.65s 0.15s ease both;
+}
+
+.animate-fade-in-up-delay-2 {
+  animation: fadeInUp 0.65s 0.30s ease both;
+}
+
+.animate-fade-in-up-delay-3 {
+  animation: fadeInUp 0.65s 0.45s ease both;
+}
+
+/* FAQ Accordion */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.25s ease;
+}
+
+.faq-answer.open {
+  max-height: 600px;
+}

@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import DashboardLayout from "./layouts/DashboardLayout"
 import UserTopbarLayout from "./layouts/UserTopbarLayout"
 
+import LandingPage from "./pages/LandingPage"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import DashboardPage from "./pages/DashboardPage"
@@ -22,6 +23,34 @@ import MyServiceRequestsPage from "./pages/MyServiceRequestsPage"
 import MyRequestsPage from "./pages/MyRequestsPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
+/**
+ * PublicOrHomeRoute
+ * - While auth is loading → show a minimal full-screen loader.
+ * - If NOT authenticated → show the Landing Page.
+ * - If authenticated as USER → redirect to /services/explore.
+ * - If authenticated as HOST or ADMIN → redirect to /dashboard.
+ */
+const PublicOrHomeRoute = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-xl animate-pulse">
+            <span className="text-white font-black text-lg">C</span>
+          </div>
+          <p className="text-slate-400 text-sm">Cargando…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return <LandingPage />;
+  if (user.rol === "USER") return <Navigate to="/services/explore" replace />;
+  return <Navigate to="/dashboard" replace />;
+};
+
 const DynamicLayout = () => {
   const { user } = useAuth();
   if (user?.rol === "USER") {
@@ -30,36 +59,30 @@ const DynamicLayout = () => {
   return <DashboardLayout />;
 };
 
-const RootRedirect = () => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
-  if (user.rol === "USER") {
-    return <Navigate to="/services/explore" replace />;
-  }
-  return <Navigate to="/dashboard" replace />;
-};
-
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Root — smart redirect / landing page */}
+        <Route path="/" element={<PublicOrHomeRoute />} />
+
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* Protected routes */}
+        {/* Protected layout routes */}
         <Route
-          path="/"
+          path="/app"
           element={
             <ProtectedRoute>
               <DynamicLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<RootRedirect />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
 
           <Route path="dashboard" element={<DashboardPage />} />
-          
+
           <Route
             path="my-overview"
             element={
@@ -151,15 +174,39 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="explore"
-              element={
-                <ProtectedRoute allowedRoles={["USER"]}>
-                  <PublicServicesPage />
-                </ProtectedRoute>
-              }
-            />
           </Route>
+        </Route>
+
+        {/* Top-level protected routes (USER role — uses UserTopbarLayout) */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={["USER"]}>
+              <UserTopbarLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="my-overview" element={<UserOverviewPage />} />
+          <Route path="my-requests" element={<MyRequestsPage />} />
+          <Route path="services/explore" element={<PublicServicesPage />} />
+        </Route>
+
+        {/* Top-level protected routes (ADMIN / HOST — uses DashboardLayout) */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "HOST"]}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="users/create" element={<CreateUserPage />} />
+          <Route path="users/:id/edit" element={<EditUserPage />} />
+          <Route path="services" element={<ServicesPage />} />
+          <Route path="services/create" element={<CreateServicePage />} />
+          <Route path="services/:id/edit" element={<EditServicePage />} />
+          <Route path="services/pending" element={<PendingServicesPage />} />
+          <Route path="service-requests" element={<MyServiceRequestsPage />} />
         </Route>
 
         {/* 404 */}

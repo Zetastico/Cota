@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import serviceRequestService from '../services/serviceRequestService.js';
+import conversationService from '../services/conversationService.js';
 import RatingStars from '../components/RatingStars.jsx';
 import ReviewModal from '../components/ReviewModal.jsx';
 
@@ -95,8 +97,8 @@ const KpiCard = ({ label, value, color }) => {
   );
 };
 
-/* Tarjeta de solicitud */
-const RequestCard = ({ req, onRate }) => (
+/* RequestCard ─────────────────────────────────────────────────────── */
+const RequestCard = ({ req, onRate, onChat }) => (
   <div className="group bg-white rounded-2xl border border-slate-100 shadow-premium overflow-hidden
     hover:shadow-premium-hover hover:border-indigo-100 hover:-translate-y-0.5 transition-all duration-200">
 
@@ -183,29 +185,40 @@ const RequestCard = ({ req, onRate }) => (
               </span>
             </div>
 
-            {/* Calificación */}
-            {req.status === 'ACCEPTED' && (
-              <div>
-                <span className="text-2xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Calificación</span>
-                {req.review ? (
-                  <div className="space-y-1">
-                    <RatingStars rating={req.review.rating} size={4} />
-                    <span className="text-3xs text-emerald-600 font-bold block">Calificado</span>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => onRate(req)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                    Calificar
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+              {/* Calificación */}
+              {req.status === 'ACCEPTED' && (
+                <div>
+                  <span className="text-2xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Calificación</span>
+                  {req.review ? (
+                    <div className="space-y-1">
+                      <RatingStars rating={req.review.rating} size={4} />
+                      <span className="text-3xs text-emerald-600 font-bold block">Calificado</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => onRate(req)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                      Calificar
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Botón Chat */}
+              {req.status === 'ACCEPTED' && (
+                <button
+                  onClick={() => onChat(req)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95 mt-1"
+                >
+                  <Icon d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" size="w-3.5 h-3.5" />
+                  Abrir Chat
+                </button>
+              )}
+            </div>
         </div>
 
         {/* Mensaje */}
@@ -224,6 +237,7 @@ const RequestCard = ({ req, onRate }) => (
 
 /* ═══════════════════════════════════════════════════════════════════ */
 const MyRequestsPage = () => {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -262,6 +276,15 @@ const MyRequestsPage = () => {
     setRequests((prev) =>
       prev.map((r) => (r.id === selectedRequest.id ? { ...r, review: newReview } : r))
     );
+  };
+
+  const handleChatClick = async (req) => {
+    try {
+      const conv = await conversationService.openConversationFromRequest(req.id);
+      navigate(`/messages?conversationId=${conv.id}`);
+    } catch (err) {
+      console.error('Error al abrir chat:', err);
+    }
   };
 
   const stats = {
@@ -358,7 +381,7 @@ const MyRequestsPage = () => {
           ) : (
             <div className="space-y-4">
               {filteredRequests.map((req) => (
-                <RequestCard key={req.id} req={req} onRate={handleRateClick} />
+                <RequestCard key={req.id} req={req} onRate={handleRateClick} onChat={handleChatClick} />
               ))}
             </div>
           )}

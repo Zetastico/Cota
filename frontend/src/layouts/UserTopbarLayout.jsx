@@ -35,6 +35,7 @@ const UserTopbarLayout = () => {
   const navItems = [
     { name: 'Explorar Servicios', href: '/services/explore' },
     { name: 'Mis Solicitudes', href: '/my-requests' },
+    { name: 'Mensajes', href: '/messages' },
     { name: 'Mi Actividad', href: '/my-overview' },
   ];
 
@@ -179,7 +180,11 @@ const UserTopbarLayout = () => {
       )}
 
       {/* ── CONTENIDO PRINCIPAL ── */}
-      <main className="flex-1 max-w-7xl mx-auto p-4 md:p-6 lg:p-8 w-full">
+      <main className={`flex-1 w-full overflow-hidden ${
+        location.pathname === '/messages'
+          ? ''
+          : 'max-w-7xl mx-auto p-4 md:p-6 lg:p-8'
+      }`}>
         <Outlet />
       </main>
     </div>

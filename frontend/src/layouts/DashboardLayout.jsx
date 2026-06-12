@@ -68,6 +68,7 @@ const ICONS = {
   requests:   'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
   myRequests: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
   logout:     'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
+  messages:   'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
   chevronLeft:'M11 19l-7-7 7-7m8 14l-7-7 7-7',
   menu:       'M4 6h16M4 12h16M4 18h16',
   close:      'M6 18L18 6M6 6l12 12',
@@ -91,6 +92,7 @@ const buildNavigation = (role) => {
       ...base,
       { name: 'Mis Servicios', href: '/services', icon: 'services', group: 'gestión' },
       { name: 'Solicitudes Recibidas', href: '/service-requests', icon: 'requests', group: 'gestión' },
+      { name: 'Mensajes', href: '/messages', icon: 'messages', group: 'comunicación' },
     ];
   }
   if (role === 'USER') {
@@ -419,10 +421,16 @@ const DashboardLayout = () => {
         </header>
 
         {/* Área de contenido */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto animate-fadeIn">
+        <main className="flex-1 overflow-y-auto">
+          {location.pathname === '/messages' ? (
             <Outlet />
-          </div>
+          ) : (
+            <div className="p-4 md:p-6 lg:p-8">
+              <div className="max-w-7xl mx-auto animate-fadeIn">
+                <Outlet />
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

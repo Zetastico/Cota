@@ -40,6 +40,7 @@ model User {
 
   services  Service[]
   requests  ServiceRequest[]
+  conversations Conversation[]
 
   // Relaciones de calificaciones
   reviewsGiven    Review[] @relation("UserReviews")
@@ -90,11 +91,47 @@ model ServiceRequest {
   paymentMethod PaymentMethod @default(CASH)
 
   review       Review?
+  conversation  Conversation?
 
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
   @@map("service_requests")
+}
+
+model Conversation {
+  id         String         @id @default(uuid())
+
+  requestId  String         @unique
+  request    ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  // Participants (denormalized for quick access)
+  userId     String
+  user       User           @relation(fields: [userId], references: [id])
+
+  messages   Message[]
+
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       String
+  senderRole     Role
+
+  body           String
+  readAt         DateTime?
+
+  createdAt      DateTime     @default(now())
+
+  @@map("messages")
 }
 
 model Review {

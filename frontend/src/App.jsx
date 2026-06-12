@@ -21,6 +21,7 @@ import PendingServicesPage from "./pages/PendingServicesPage"
 import PublicServicesPage from "./pages/PublicServicesPage"
 import MyServiceRequestsPage from "./pages/MyServiceRequestsPage"
 import MyRequestsPage from "./pages/MyRequestsPage"
+import MessagesPage from "./pages/MessagesPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
 /**
@@ -187,6 +188,7 @@ function App() {
         >
           <Route path="my-overview" element={<UserOverviewPage />} />
           <Route path="my-requests" element={<MyRequestsPage />} />
+          <Route path="messages" element={<MessagesPage />} />
           <Route path="services/explore" element={<PublicServicesPage />} />
         </Route>
 
@@ -207,6 +209,7 @@ function App() {
           <Route path="services/:id/edit" element={<EditServicePage />} />
           <Route path="services/pending" element={<PendingServicesPage />} />
           <Route path="service-requests" element={<MyServiceRequestsPage />} />
+          <Route path="messages" element={<MessagesPage />} />
         </Route>
 
         {/* 404 */}

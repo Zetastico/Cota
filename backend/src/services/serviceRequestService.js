@@ -52,6 +52,7 @@ const createRequest = async (data, userId) => {
       message,
       contactPhone,
       desiredDate: parsedDate,
+      paymentMethod: data.paymentMethod || 'CASH',
       status: 'PENDING',
     },
     include: {
@@ -87,6 +88,14 @@ const getMyServiceRequests = async (hostId) => {
           email: true,
         },
       },
+      review: {
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+        }
+      }
     },
     orderBy: {
       createdAt: 'desc',
@@ -129,6 +138,14 @@ const acceptRequest = async (id, hostId) => {
           email: true,
         },
       },
+      review: {
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+        }
+      }
     },
   });
 };
@@ -168,6 +185,14 @@ const rejectRequest = async (id, hostId) => {
           email: true,
         },
       },
+      review: {
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+        }
+      }
     },
   });
 };
@@ -197,6 +222,14 @@ const getMyRequests = async (userId) => {
           },
         },
       },
+      review: {
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+        }
+      }
     },
     orderBy: {
       createdAt: 'desc',

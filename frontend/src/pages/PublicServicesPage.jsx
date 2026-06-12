@@ -140,7 +140,29 @@ const ServiceCard = ({ service, isOwner, onRequestClick }) => {
             </div>
             <div className="min-w-0">
               <p className="text-2xs font-semibold text-slate-700 truncate leading-none">{hostName}</p>
-              <p className="text-3xs text-slate-400 mt-0.5 leading-none">Proveedor verificado</p>
+              
+              {/* Host rating */}
+              <div className="flex items-center gap-1.5 mt-1">
+                {service.hostReviewsCount > 0 ? (
+                  <>
+                    <div className="flex text-amber-400">
+                      <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    </div>
+                    <span className="text-3xs font-extrabold text-slate-700 leading-none">
+                      {service.hostAverageRating}
+                    </span>
+                    <span className="text-3xs text-slate-400 leading-none">
+                      ({service.hostReviewsCount})
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-3xs font-semibold text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded leading-none">
+                    Nuevo
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

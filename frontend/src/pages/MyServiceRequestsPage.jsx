@@ -134,7 +134,7 @@ const RequestCard = ({ req, onAccept, onReject, actioningId }) => {
             </div>
           </div>
 
-          {/* Fechas y mensaje */}
+          {/* Fechas y método de pago */}
           <div className="space-y-3">
             <div>
               <span className="text-2xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Fecha deseada</span>
@@ -144,11 +144,33 @@ const RequestCard = ({ req, onAccept, onReject, actioningId }) => {
               </p>
             </div>
             <div>
-              <span className="text-2xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Recibida el</span>
-              <p className="text-2xs text-slate-500">{formatDate(req.createdAt)}</p>
+              <span className="text-2xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Método de pago</span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-bold rounded-lg border border-indigo-100 bg-indigo-50/50 text-indigo-700">
+                {req.paymentMethod === 'CARD' ? 'Tarjeta' : req.paymentMethod === 'QR' ? 'Código QR' : 'Efectivo'}
+              </span>
             </div>
           </div>
         </div>
+
+        {/* Calificación si la hay */}
+        {req.review && (
+          <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 space-y-1.5">
+            <span className="text-2xs text-slate-400 font-semibold uppercase tracking-wider block">Calificación recibida</span>
+            <div className="flex items-center gap-2">
+              <div className="flex text-amber-400">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <svg key={s} className={`w-4 h-4 ${s <= req.review.rating ? 'fill-current' : 'text-slate-300'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-xs font-bold text-slate-700">{req.review.rating}/5</span>
+            </div>
+            {req.review.comment && (
+              <p className="text-xs text-slate-500 italic mt-1">"{req.review.comment}"</p>
+            )}
+          </div>
+        )}
 
         {/* Mensaje del cliente */}
         {req.message && (

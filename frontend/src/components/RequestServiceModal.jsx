@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import serviceRequestService from '../services/serviceRequestService.js';
+import PaymentMethodSelector from './PaymentMethodSelector.jsx';
 
 /* ── Toda la lógica es idéntica al original. Solo mejoras visuales. ── */
 
@@ -45,6 +46,7 @@ const RequestServiceModal = ({ service, onClose }) => {
     message: '',
     contactPhone: '',
     desiredDate: '',
+    paymentMethod: 'CASH',
   });
 
   const [loading, setLoading] = useState(false);
@@ -59,6 +61,10 @@ const RequestServiceModal = ({ service, onClose }) => {
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handlePaymentChange = (method) => {
+    setFormData((prev) => ({ ...prev, paymentMethod: method }));
   };
 
   const handleSubmit = async (e) => {
@@ -80,6 +86,9 @@ const RequestServiceModal = ({ service, onClose }) => {
       const parsedDate = new Date(formData.desiredDate);
       if (parsedDate < new Date()) errors.desiredDate = 'La fecha debe ser en el futuro.';
     }
+    if (!formData.paymentMethod) {
+      errors.paymentMethod = 'El método de pago es obligatorio.';
+    }
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -93,6 +102,7 @@ const RequestServiceModal = ({ service, onClose }) => {
         message: formData.message.trim(),
         contactPhone: formData.contactPhone.trim(),
         desiredDate: formData.desiredDate,
+        paymentMethod: formData.paymentMethod,
       });
       setSuccess(true);
       setTimeout(() => { onClose(); }, 2500);
@@ -111,7 +121,7 @@ const RequestServiceModal = ({ service, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
       {/* Backdrop con blur premium */}
       <div
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm animate-fadeIn"
@@ -120,7 +130,7 @@ const RequestServiceModal = ({ service, onClose }) => {
 
       {/* Panel modal */}
       <div className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl
-        animate-slideUp sm:animate-scaleIn overflow-hidden">
+        animate-slideUp sm:animate-scaleIn overflow-hidden my-8">
 
         {/* Header del modal */}
         <div className="relative bg-gradient-to-br from-indigo-600 to-indigo-700 p-5 text-white">
@@ -156,7 +166,7 @@ const RequestServiceModal = ({ service, onClose }) => {
         </div>
 
         {/* Body */}
-        <div className="p-5">
+        <div className="p-5 max-h-[75vh] overflow-y-auto">
           {success ? (
             /* ── Estado de Éxito ── */
             <div className="py-8 text-center space-y-4 animate-fadeIn">
@@ -210,6 +220,18 @@ const RequestServiceModal = ({ service, onClose }) => {
                   hint="Futura"
                 />
               </div>
+
+              {/* Selector de Método de Pago */}
+              <PaymentMethodSelector
+                value={formData.paymentMethod}
+                onChange={handlePaymentChange}
+              />
+              {validationErrors.paymentMethod && (
+                <p className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+                  <Icon d="M12 9v2m0 4h.01" size="w-3.5 h-3.5" />
+                  {validationErrors.paymentMethod}
+                </p>
+              )}
 
               {/* Mensaje */}
               <div className="space-y-1.5">

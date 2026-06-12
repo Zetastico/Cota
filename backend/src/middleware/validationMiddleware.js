@@ -193,5 +193,8 @@ export const createRequestValidation = [
   body('desiredDate')
     .notEmpty().withMessage('La fecha deseada de ejecución es obligatoria.')
     .isISO8601().withMessage('Debe proporcionar una fecha en formato ISO8601 válido (AAAA-MM-DD).'),
+  body('paymentMethod')
+    .notEmpty().withMessage('El método de pago es obligatorio.')
+    .isIn(['CASH', 'QR', 'CARD']).withMessage('El método de pago debe ser CASH, QR o CARD.'),
   validateResults,
 ];

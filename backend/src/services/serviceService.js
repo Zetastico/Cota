@@ -181,7 +181,7 @@ const getPublicServices = async (filters = {}) => {
     };
   }
 
-  const [total, data] = await Promise.all([
+  const [total, rawServices] = await Promise.all([
     prisma.service.count({ where }),
     prisma.service.findMany({
       where,
@@ -193,6 +193,12 @@ const getPublicServices = async (filters = {}) => {
             apellido: true,
             email: true,
             rol: true,
+            // Reviews recibidas por el HOST
+            reviewsReceived: {
+              select: {
+                rating: true,
+              },
+            },
           },
         },
       },
@@ -201,6 +207,26 @@ const getPublicServices = async (filters = {}) => {
       take: limitNum,
     }),
   ]);
+
+  // Calcular calificaciones promedio del HOST para cada servicio
+  const data = rawServices.map((service) => {
+    const reviews = service.owner?.reviewsReceived || [];
+    const hostReviewsCount = reviews.length;
+    const hostAverageRating =
+      hostReviewsCount > 0
+        ? parseFloat((reviews.reduce((sum, r) => sum + r.rating, 0) / hostReviewsCount).toFixed(1))
+        : 0;
+
+    // Quitar array de reviewsReceived para evitar exponer datos redundantes
+    const { reviewsReceived, ...ownerData } = service.owner;
+
+    return {
+      ...service,
+      owner: ownerData,
+      hostReviewsCount,
+      hostAverageRating,
+    };
+  });
 
   return {
     data,

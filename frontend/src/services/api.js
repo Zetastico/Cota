@@ -40,6 +40,7 @@ api.interceptors.response.use(
       
       // Emitir un evento global para que AuthContext actualice su estado
       window.dispatchEvent(new Event('cotal-auth-expired'));
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

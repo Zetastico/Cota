@@ -4,7 +4,7 @@ import api from './api.js';
  * Listar todas las conversaciones del usuario autenticado
  */
 export const getMyConversations = async () => {
-  const { data } = await api.get('/conversations');
+  const { data } = await api.get('/api/conversations');
   return data.conversations;
 };
 
@@ -12,7 +12,7 @@ export const getMyConversations = async () => {
  * Abrir (o crear) la conversación de una solicitud ACCEPTED
  */
 export const openConversationFromRequest = async (requestId) => {
-  const { data } = await api.post(`/conversations/from-request/${requestId}`);
+  const { data } = await api.post(`/api/conversations/from-request/${requestId}`);
   return data.conversation;
 };
 
@@ -20,7 +20,7 @@ export const openConversationFromRequest = async (requestId) => {
  * Obtener mensajes de una conversación
  */
 export const getMessages = async (conversationId, page = 1, limit = 50) => {
-  const { data } = await api.get(`/conversations/${conversationId}/messages`, {
+  const { data } = await api.get(`/api/conversations/${conversationId}/messages`, {
     params: { page, limit },
   });
   return data.messages;
@@ -30,7 +30,7 @@ export const getMessages = async (conversationId, page = 1, limit = 50) => {
  * Enviar un mensaje a una conversación
  */
 export const sendMessage = async (conversationId, body) => {
-  const { data } = await api.post(`/conversations/${conversationId}/messages`, { body });
+  const { data } = await api.post(`/api/conversations/${conversationId}/messages`, { body });
   return data.message;
 };
 
@@ -38,7 +38,7 @@ export const sendMessage = async (conversationId, body) => {
  * Obtener el conteo de mensajes no leídos
  */
 export const getUnreadCount = async () => {
-  const { data } = await api.get('/conversations/unread-count');
+  const { data } = await api.get('/api/conversations/unread-count');
   return data.count;
 };
 

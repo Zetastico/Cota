@@ -188,7 +188,6 @@ function App() {
         >
           <Route path="my-overview" element={<UserOverviewPage />} />
           <Route path="my-requests" element={<MyRequestsPage />} />
-          <Route path="messages" element={<MessagesPage />} />
           <Route path="services/explore" element={<PublicServicesPage />} />
         </Route>
 
@@ -209,6 +208,17 @@ function App() {
           <Route path="services/:id/edit" element={<EditServicePage />} />
           <Route path="services/pending" element={<PendingServicesPage />} />
           <Route path="service-requests" element={<MyServiceRequestsPage />} />
+        </Route>
+
+
+        {/* Shared messages route for USER and HOST */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={["USER", "HOST"]}>
+              <DynamicLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="messages" element={<MessagesPage />} />
         </Route>
 
